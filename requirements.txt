@@ -1,0 +1,39 @@
+# Core Framework
+flask>=3.0.0
+werkzeug>=3.0.0
+
+# YouTube Download Support
+yt-dlp>=2025.12.8
+
+# Video Processing
+pytesseract>=0.3.13
+opencv-python>=4.8.0
+moviepy>=2.2.1
+
+# Audio Transcription
+openai-whisper>=20250625
+groq>=1.0.0
+pydub>=0.25.1
+pyaudioop>=0.3.4  # Required for pydub on Python 3.13+
+
+# AI/ML
+google-genai>=1.60.0
+
+# Document Generation
+python-pptx>=0.6.21
+reportlab>=4.0.7
+Pillow>=10.0.0
+reportlab>=4.4.5
+
+# Utilities
+numpy>=1.24.0
+python-dotenv>=1.0.0
+
+#other
+dotenv>=0.9.9
+
+
+# Optional (for production)
+# celery>=5.3.0  # For async processing
+# redis>=5.0.0   # For task queue
+# gunicorn>=21.2.0  # For production server

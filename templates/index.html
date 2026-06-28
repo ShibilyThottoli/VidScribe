@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VidScribe - AI Video Summarizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+  <!-- Navigation Header -->
+  <header class="nav-header">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="VidScribe Logo" class="brand-logo-img">
+        <span class="brand-name">VidScribe</span>
+      </div>
+      <div class="nav-actions">
+        <button class="nav-btn login-btn">Login</button>
+        <button class="nav-btn signup-btn">Sign Up</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">Transform Videos into Professional Presentations with AI</h1>
+      <p class="hero-description">
+        Upload your video or paste a YouTube URL to automatically generate PowerPoint presentations,
+        PDF reports, or text summaries. Extract key insights, create structured content, and save hours of manual work.
+      </p>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Upload Section -->
+      <section class="upload-section" id="uploadSection">
+        <form id="uploadForm" enctype="multipart/form-data">
+
+          <!-- Input Method Toggle -->
+          <div class="glass-card toggle-card">
+            <div class="radio-inputs">
+              <label class="radio">
+                <input type="radio" name="input-source" value="upload" checked id="uploadToggle">
+                <span class="name">Upload</span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="input-source" value="youtube" id="youtubeToggle">
+                <span class="name">YouTube</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Upload Box (shown by default) -->
+          <div class="glass-card upload-card" id="uploadBox">
+            <h3 class="card-title">Upload Video</h3>
+            <div class="upload-area">
+              <label for="videoFile" class="file-drop-area">
+                <div class="folder-container">
+                  <div class="folder">
+                    <div class="front-side">
+                      <div class="tip"></div>
+                      <div class="cover"></div>
+                    </div>
+                    <div class="back-side cover"></div>
+                  </div>
+                  <label class="custom-file-upload">
+                    <input type="file" id="videoFile" name="video" accept="video/*" />
+                    <span id="fileButtonText">Choose a file</span>
+                  </label>
+                </div>
+                <p class="upload-text" id="uploadText">Drag and drop your video here, or click to browse</p>
+                <p class="selected-file-name" id="selectedFileName"></p>
+                <div class="upload-info">
+                  <small>Supported formats: MP4, MOV, AVI, WEBM</small>
+                  <small>Maximum 500MB per video</small>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- YouTube Box (hidden by default) -->
+          <div class="glass-card youtube-card hidden" id="youtubeBox">
+            <h3 class="card-title">YouTube Video</h3>
+            <div class="youtube-input-wrapper">
+              <input type="url" id="youtubeUrl" name="youtube_url" placeholder="Enter your URL"
+                class="youtube-styled-input" />
+              <button type="button" class="youtube-select-btn" onclick="handleYouTubeUrl()">Select</button>
+            </div>
+            <div class="youtube-info">
+              <small>Example: https://www.youtube.com/watch?v=...</small>
+              <small>Supports standard YouTube video links</small>
+            </div>
+          </div>
+
+          <!-- Output Format Selection -->
+          <div class="glass-card format-card">
+            <h3 class="card-title">Output Format</h3>
+            <div class="radio-inputs">
+              <label class="radio">
+                <input type="radio" name="output_format" value="ppt" id="pptFormatRadio" checked>
+                <span class="name">PPT</span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="output_format" value="pdf" id="pdfFormatRadio">
+                <span class="name">PDF</span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="output_format" value="summary" id="summaryFormatRadio">
+                <span class="name">Summary</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Template Selection (for PPT only) -->
+          <div class="glass-card template-selection-card" id="templateSection">
+            <h3 class="card-title">PowerPoint Template</h3>
+
+            <!-- Slide Count Selection -->
+            <div class="slide-count-section">
+              <label for="slideCount" class="slide-count-label">Number of Slides</label>
+              <select id="slideCount" name="slide_count" class="slide-count-dropdown">
+                <option value="10" selected>Short (10-15 slides)</option>
+                <option value="15">Medium (15-20 slides)</option>
+                <option value="20">Detailed (20-25 slides)</option>
+              </select>
+            </div>
+
+            <div class="template-grid-container">
+              <!-- Educational -->
+              <div class="template-flip-card" data-template="educational">
+                <input type="radio" name="ppt_template" value="educational" checked />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/educational.png') }}"
+                  alt="Educational" class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Educational</p>
+                  <p class="card__description">Clean layouts for academic content.</p>
+                </div>
+              </div>
+
+              <!-- Professional -->
+              <div class="template-flip-card" data-template="professional">
+                <input type="radio" name="ppt_template" value="professional" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/professional.png') }}"
+                  alt="Professional" class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Professional</p>
+                  <p class="card__description">Elegant design for business.</p>
+                </div>
+              </div>
+
+              <!-- Clean -->
+              <div class="template-flip-card" data-template="clean">
+                <input type="radio" name="ppt_template" value="clean" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/clean.png') }}" alt="Clean"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Clean</p>
+                  <p class="card__description">Simple, uncluttered design.</p>
+                </div>
+              </div>
+
+              <!-- Fun -->
+              <div class="template-flip-card" data-template="Fun">
+                <input type="radio" name="ppt_template" value="Fun" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/Fun.png') }}" alt="Fun"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Fun</p>
+                  <p class="card__description">Vibrant and playful style.</p>
+                </div>
+              </div>
+
+              <!-- Academic -->
+              <div class="template-flip-card" data-template="acedamic">
+                <input type="radio" name="ppt_template" value="acedamic" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/acedamic.png') }}" alt="Academic"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Academic</p>
+                  <p class="card__description">Ideal for research papers.</p>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Dark -->
+              <div class="template-flip-card" data-template="dark">
+                <input type="radio" name="ppt_template" value="dark" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/dark.png') }}" alt="Dark"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Dark</p>
+                  <p class="card__description">Sleek dark theme.</p>
+                  </p>
+                </div>
+              </div>
+
+              <!-- Folder -->
+              <div class="template-flip-card" data-template="folder">
+                <input type="radio" name="ppt_template" value="folder" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/folder.png') }}" alt="Folder"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Folder</p>
+                  <p class="card__description">Organized folder-style layout.</p>
+                </div>
+              </div>
+
+              <!-- Gradient -->
+              <div class="template-flip-card" data-template="gradiant">
+                <input type="radio" name="ppt_template" value="gradiant" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/gradiant.png') }}" alt="Gradient"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Gradient</p>
+                  <p class="card__description">Eye-catching gradient backgrounds.</p>
+                </div>
+              </div>
+
+              <!-- Historic -->
+              <div class="template-flip-card" data-template="historic">
+                <input type="radio" name="ppt_template" value="historic" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/historic.png') }}" alt="Historic"
+                  class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Historic</p>
+                  <p class="card__description">Classic vintage design.</p>
+                </div>
+              </div>
+
+              <!-- Modern Tech -->
+              <div class="template-flip-card" data-template="modern_tech">
+                <input type="radio" name="ppt_template" value="modern_tech" />
+                <img src="{{ url_for('static', filename='images/template_thumbnails/modern_tech.png') }}"
+                  alt="Modern Tech" class="card-thumbnail" />
+                <div class="card__content">
+                  <p class="card__title">Modern Tech</p>
+                  <p class="card__description">Futuristic tech design.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="template-selection-info">
+              <span class="selected-template-name">Educational</span>
+              <small>Click a template to select • Hover to see details</small>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="cssbuttons-io-button" id="uploadBtn">
+            Start Processing
+            <div class="icon">
+              <svg height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                  fill="currentColor"></path>
+              </svg>
+            </div>
+          </button>
+        </form>
+      </section>
+
+      <!-- Processing Section -->
+      <section class="processing-section hidden" id="processingSection">
+        <div class="card">
+          <h2>Processing Video</h2>
+
+          <div class="video-info" id="videoInfo"></div>
+
+          <!-- Truck Loader Animation -->
+          <div class="loader">
+            <div class="truckWrapper">
+              <div class="truckBody">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 198 93" class="trucksvg">
+                  <path stroke-width="3" stroke="#282828" fill="#F83D3D"
+                    d="M135 22.5H177.264C178.295 22.5 179.22 23.133 179.594 24.0939L192.33 56.8443C192.442 57.1332 192.5 57.4404 192.5 57.7504V89C192.5 90.3807 191.381 91.5 190 91.5H135C133.619 91.5 132.5 90.3807 132.5 89V25C132.5 23.6193 133.619 22.5 135 22.5Z">
+                  </path>
+                  <path stroke-width="3" stroke="#282828" fill="#7D7C7C"
+                    d="M146 33.5H181.741C182.779 33.5 183.709 34.1415 184.078 35.112L190.538 52.112C191.16 53.748 189.951 55.5 188.201 55.5H146C144.619 55.5 143.5 54.3807 143.5 53V36C143.5 34.6193 144.619 33.5 146 33.5Z">
+                  </path>
+                  <path stroke-width="2" stroke="#282828" fill="#282828"
+                    d="M150 65C150 65.39 149.763 65.8656 149.127 66.2893C148.499 66.7083 147.573 67 146.5 67C145.427 67 144.501 66.7083 143.873 66.2893C143.237 65.8656 143 65.39 143 65C143 64.61 143.237 64.1344 143.873 63.7107C144.501 63.2917 145.427 63 146.5 63C147.573 63 148.499 63.2917 149.127 63.7107C149.763 64.1344 150 64.61 150 65Z">
+                  </path>
+                  <rect stroke-width="2" stroke="#282828" fill="#FFFCAB" rx="1" height="7" width="5" y="63" x="187">
+                  </rect>
+                  <rect stroke-width="2" stroke="#282828" fill="#282828" rx="1" height="11" width="4" y="81" x="193">
+                  </rect>
+                  <rect stroke-width="3" stroke="#282828" fill="#DFDFDF" rx="2.5" height="90" width="121" y="1.5"
+                    x="6.5"></rect>
+                  <rect stroke-width="2" stroke="#282828" fill="#DFDFDF" rx="2" height="4" width="6" y="84" x="1">
+                  </rect>
+                </svg>
+              </div>
+              <div class="truckTires">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 30" class="tiresvg">
+                  <circle stroke-width="3" stroke="#282828" fill="#282828" r="13.5" cy="15" cx="15"></circle>
+                  <circle fill="#DFDFDF" r="7" cy="15" cx="15"></circle>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 30 30" class="tiresvg">
+                  <circle stroke-width="3" stroke="#282828" fill="#282828" r="13.5" cy="15" cx="15"></circle>
+                  <circle fill="#DFDFDF" r="7" cy="15" cx="15"></circle>
+                </svg>
+              </div>
+              <div class="road"></div>
+
+              <svg xml:space="preserve" viewBox="0 0 453.459 453.459" xmlns:xlink="http://www.w3.org/1999/xlink"
+                xmlns="http://www.w3.org/2000/svg" id="Capa_1" version="1.1" fill="#000000" class="lampPost">
+                <path d="M252.882,0c-37.781,0-68.686,29.953-70.245,67.358h-6.917v8.954c-26.109,2.163-45.463,10.011-45.463,19.366h9.993
+c-1.65,5.146-2.507,10.54-2.507,16.017c0,28.956,23.558,52.514,52.514,52.514c28.956,0,52.514-23.558,52.514-52.514
+c0-5.478-0.856-10.872-2.506-16.017h9.992c0-9.354-19.352-17.204-45.463-19.366v-8.954h-6.149C200.189,38.779,223.924,16,252.882,16
+c29.952,0,54.32,24.368,54.32,54.32c0,28.774-11.078,37.009-25.105,47.437c-17.444,12.968-37.216,27.667-37.216,78.884v113.914
+h-0.797c-5.068,0-9.174,4.108-9.174,9.177c0,2.844,1.293,5.383,3.321,7.066c-3.432,27.933-26.851,95.744-8.226,115.459v11.202h45.75
+v-11.202c18.625-19.715-4.794-87.527-8.227-115.459c2.029-1.683,3.322-4.223,3.322-7.066c0-5.068-4.107-9.177-9.176-9.177h-0.795
+V196.641c0-43.174,14.942-54.283,30.762-66.043c14.793-10.997,31.559-23.461,31.559-60.277C323.202,31.545,291.656,0,252.882,0z
+M232.77,111.694c0,23.442-19.071,42.514-42.514,42.514c-23.442,0-42.514-19.072-42.514-42.514c0-5.531,1.078-10.957,3.141-16.017
+h78.747C231.693,100.736,232.77,106.162,232.77,111.694z"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p class="progress-text" id="progressText">Initializing...</p>
+          </div>
+
+          <div class="processing-steps">
+            <div class="step" data-step="1">
+              <span class="step-icon"></span>
+              <span>Video Validation</span>
+            </div>
+            <div class="step" data-step="2">
+              <span class="step-icon"></span>
+              <span>Keyframe Extraction</span>
+            </div>
+            <div class="step" data-step="3">
+              <span class="step-icon"></span>
+              <span>Audio Transcription</span>
+            </div>
+            <div class="step" data-step="4">
+              <span class="step-icon"></span>
+              <span>AI Caption Generation</span>
+            </div>
+            <div class="step" data-step="5">
+              <span class="step-icon"></span>
+              <span>Content Summarization</span>
+            </div>
+            <div class="step" data-step="6">
+              <span class="step-icon"></span>
+              <span>Output Generation</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Error Section -->
+      <section class="error-section hidden" id="errorSection">
+        <div class="card error-card">
+          <h2>Error</h2>
+          <p class="error-message" id="errorMessage"></p>
+          <button class="btn btn-secondary" id="retryBtn">
+            <span>Try Again</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="results-section hidden" id="resultsSection">
+        <div class="results-header">
+          <h2 id="presentationTitle">Presentation Results</h2>
+        </div>
+
+        <div class="results-simple-container">
+          <!-- Template Selector Card -->
+          <div class="template-selector-card" id="templateSelectorCard">
+
+            <!-- Video Details Summary -->
+            <div class="video-summary-section">
+              <div class="summary-stats">
+                <h4 style="grid-column: 1 / -1; margin: 0 0 1rem 0; font-size: 1.25rem; color: #1e293b;">Presentation
+                  Summary</h4>
+                <div class="stat-item">
+                  <span class="stat-label">Total Slides:</span>
+                  <span class="stat-value" id="slidesCount">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Template:</span>
+                  <span class="stat-value" id="currentTemplate">-</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Format:</span>
+                  <span class="stat-value" id="outputFormatLabel">PowerPoint (.pptx)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="template-header">
+              <h3>Template</h3>
+            </div>
+
+            <div class="template-selector">
+              <label for="templateDropdown">Select Template:</label>
+              <select id="templateDropdown" class="template-dropdown">
+                {% set available_templates = [
+                'professional', 'educational', 'modern_tech', 'dark', 'clean',
+                'gradiant', 'Fun', 'acedamic', 'historic', 'folder'
+                ] %}
+                {% for template in available_templates %}
+                <option value="{{ template }}">
+                  {{ template|title if template != 'acedamic' else 'Academic' }}
+                </option>
+                {% endfor %}
+              </select>
+
+              <button id="regenerateBtn" class="btn btn-primary regenerate-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                </svg>
+                Regenerate PPT
+              </button>
+
+              <div class="action-buttons-group">
+                <button class="btn btn-success" id="downloadResultBtn">
+                  Download
+                </button>
+                <button class="btn btn-secondary" id="processAnotherBtn">
+                  Process Another Video
+                </button>
+              </div>
+
+              <div id="regenerateStatus" class="regenerate-status hidden">
+                <div class="spinner"></div>
+                <span>Regenerating presentation...</span>
+              </div>
+
+              <div id="regenerateSuccess" class="regenerate-success hidden">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+                <span>PPT regenerated! Downloading...</span>
+              </div>
+            </div>
+
+            <div class="template-info-box">
+              <p><strong>Pro Tip:</strong> Test different templates without re-processing!</p>
+              <p class="template-note">No Gemini API calls during regeneration.</p>
+            </div>
+          </div>
+
+          <!-- Summary Display Section (for Summary format) -->
+          <div class="glass-card hidden" id="summaryDisplayCard" style="margin-top: 2rem;">
+            <h3 class="card-title">📝 Summary</h3>
+            <div id="summaryContent" style="padding: 1.5rem; line-height: 1.8; color: #334155; white-space: pre-wrap;">
+              <!-- Summary text will be inserted here by JavaScript -->
+            </div>
+            <div style="margin-top: 2rem; text-align: center;">
+              <button class="btn btn-secondary" id="processAnotherBtnSummary">
+                Process Another Video
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden data container - NO JINJA IN JAVASCRIPT! -->
+        <div id="resultsData" class="hidden" data-slides='{{ slides | tojson | safe if slides else "[]" }}'
+          data-output-name='{{ output_name if output_name else "" }}'
+          data-template='{{ selected_template if selected_template else "professional" }}'
+          data-title='{{ presentation_title if presentation_title else "Presentation" }}'
+          data-output-format='{{ output_format if output_format else "ppt" }}'
+          data-summary='{{ summary if summary else "" }}'>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by Vidscribe Team | VidScribe v1.0</p>
+    </footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
